@@ -1,0 +1,16 @@
+set(CWT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/cwt/cwt.cpp)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/source/cwt/std/module.cmake)
+
+set(CWT_SOURCES ${CWT_SOURCES} ${CWT_STD_SOURCES})
+
+set(CWT_TEST_SOURCES ${CWT_TEST_STD_SOURCES})
+
+
+if (CWT_BUILD_CUDA)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/source/cwt/cuda/module.cmake)
+
+    set(CWT_SOURCES ${CWT_SOURCES} ${CWT_CUDA_SOURCES})
+
+    set(CWT_TEST_SOURCES ${CWT_TEST_SOURCES} ${CWT_TEST_CUDA_SOURCES})
+endif()
