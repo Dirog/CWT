@@ -1,9 +1,9 @@
+/// \file wavelet.cpp
+/// \author Denis Kozlov
 #include <cmath>
-#include "memory"
+#include <wavelet/wavelet.hpp>
 
-#include "wavelet/wavelet.hpp"
-
-Wavelet::Wavelet(Func func, float fs, int len, std::vector<float> scales)
+Wavelet::Wavelet(Func func, float fs_hz, int len, std::vector<float> scales)
     : cols(len), rows(scales.size())
 {
     data = new float[cols * rows];
@@ -11,12 +11,12 @@ Wavelet::Wavelet(Func func, float fs, int len, std::vector<float> scales)
     {
         for (int j = 0; j < rows; ++j)
         {
-            data[i + j * cols] = func( (i - (cols - 1.0) / 2.0) / fs, scales[j] );
+            data[i + j * cols] = func( (i - (cols - 1.0) / 2.0) / fs_hz, scales[j] );
         }
     }
 }
 
-Wavelet::Wavelet(Wavelet::Func func, float fs, int signallen, int maxscale)
+Wavelet::Wavelet(Wavelet::Func func, float fs_hz, int signallen, int maxscale)
 {
     rows = maxscale;
     cols = (int)fmin(10 * rows, signallen);
@@ -34,7 +34,7 @@ Wavelet::Wavelet(Wavelet::Func func, float fs, int signallen, int maxscale)
     {
         for (int j = 0; j < rows; ++j)
         {
-            data[i + j * cols] = func( (i - (cols - 1.0) / 2.0) / fs, scales[j] );
+            data[i + j * cols] = func( (i - (cols - 1.0) / 2.0) / fs_hz, scales[j] );
         }
     }
 }

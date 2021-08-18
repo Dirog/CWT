@@ -1,8 +1,8 @@
+/// \file test.cpp
+/// \author Denis Kozlov
 #include <cmath>
-
-#include "cwt/cuda/cwt.h"
-#include "utils.hpp"
-
+#include <utils.hpp>
+#include <cwt/cuda/cwt.h>
 #include <CppUTest/TestHarness.h>
 
 namespace
@@ -40,7 +40,7 @@ TEST(CWTCUDA, Conv)
 
     CUDA cwt(cols, rows, wavelet, wavelet.scales());
 
-    cwt.execute_conv(input, output);
+    cwt.execute(input, output, CWT::TimeDomain);
 
     float diff = Difference::Subtraction(output, expected, outputlen);
 
@@ -71,7 +71,7 @@ TEST(CWTCUDA, FFT)
 
     CUDA cwt(cols, rows, wavelet, wavelet.scales());
 
-    cwt.execute_fft(input, output);
+    cwt.execute(input, output, CWT::FrequencyDomain);
 
     float diff = Difference::Subtraction(output, expected, outputlen);
 

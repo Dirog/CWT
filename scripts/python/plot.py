@@ -11,7 +11,7 @@ path  = sys.argv[4]
 signal_raw = np.fromfile(path, dtype='float32')
 signal = np.reshape(signal_raw, (rows, len(signal_raw) // rows))
 
-cwt_raw = np.fromfile("/home/dirog/Projects/cwtstd_test/source/test/plot/output.bin", dtype='float32')
+cwt_raw = np.fromfile("/home/dirog/Projects/CWT/source/test/plot/output.bin", dtype='float32')
 cwt = np.reshape(cwt_raw, (rows, frows, cols))
 
 plt.rcParams["font.family"] = "Courier New"
@@ -27,5 +27,5 @@ for i in range(rows):
 	axs[1].set_ylabel("a")
 	
 
-fig.savefig('/home/dirog/Desktop/cwt.eps', format='eps')
+#fig.savefig('/home/dirog/Desktop/cwt.eps', format='eps')
 plt.show()

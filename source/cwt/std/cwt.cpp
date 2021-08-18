@@ -1,6 +1,8 @@
-#include "cwt/std/cwt.h"
+/// \file cwt.cpp
+/// \author Denis Kozlov
 #include <chrono>
 #include <iostream>
+#include <cwt/std/cwt.h>
 
 void conv(float *out, const float *in, const float *filter, int cols, int fcols)
 {
@@ -35,25 +37,28 @@ STD::~STD()
 
 }
 
-bool STD::execute_conv(float *in, float *out)
+bool STD::execute(const float *in, float *out, Mode mode)
 {
+    if (mode == FrequencyDomain)
+    {
+        return false;
+    }
+
     auto start = std::chrono::high_resolution_clock::now();
     int frows = wavelet.shape(1);
     for(int c = 0; c < rows; c++)
     {
         for (int i = 0; i < frows; i++)
         {
-            conv(out + i * cols + c * cols * frows, in + c * cols, wavelet.ptr() + i * wavelet.shape(0), cols, wavelet.shape(0));
+            conv(out + i * cols + c * cols * frows, in + c * cols,
+                wavelet.ptr() + i * wavelet.shape(0),cols, wavelet.shape(0));
         }
     }
     auto finish = std::chrono::high_resolution_clock::now();
     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    std::cout << "STD Conv Elapsed time: " << duration_us.count() << " us\n";
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    std::cout << "STD Conv Elapsed time: " << duration_ms.count() << " ms\n";
-}
+    std::cout << "STD Conv Elapsed time: " << duration_us.count() << "us\t" << duration_ms.count() << "ms\n";
 
-bool STD::execute_fft(float *in, float *out) {
-    return false;
+    return true;
 }
 

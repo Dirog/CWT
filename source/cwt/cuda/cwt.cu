@@ -1,8 +1,11 @@
-#include <iostream>
-#include <cufft.h>
-#include "stdio.h"
-#include "cwt/cuda/cwt.h"
+/// \file cwt.cpp
+/// \author Denis Kozlov
 #include <chrono>
+#include <cufft.h>
+#include <stdio.h>
+#include <iostream>
+#include <cwt/cuda/cwt.h>
+
 
 #define BLOCK_DIM 128
 namespace Kernels
@@ -122,7 +125,7 @@ CUDA::~CUDA()
 
 }
 
-bool CUDA::execute_conv(float* in, float* out)
+bool execute_conv(const float* in, float* out, int cols, int rows, const Wavelet& wavelet)
 {
     auto err = cudaSetDevice(0);
     if (err != 0) std::cout << err << std::endl;
@@ -154,8 +157,8 @@ bool CUDA::execute_conv(float* in, float* out)
         if (err != 0) std::cout << err << std::endl;
 
 
-    cudaStream_t stream[scales.size()];
-    Kernels::createStreams(stream, scales.size());
+    cudaStream_t stream[frows];
+    Kernels::createStreams(stream, frows);
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -178,11 +181,10 @@ bool CUDA::execute_conv(float* in, float* out)
     cudaDeviceSynchronize();
     auto finish = std::chrono::high_resolution_clock::now();
     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    std::cout << "CUDA Conv Elapsed time: " << duration_us.count() << " us\n";
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    std::cout << "CUDA Conv Elapsed time: " << duration_ms.count() << " ms\n";
+    std::cout << "CUDA Conv Elapsed time: " << duration_us.count() << "us\t" << duration_ms.count() << "ms\n";
 
-    err = cudaMemcpy(out, d_out_rearranged, cols * rows * scales.size() * sizeof(float), cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(out, d_out_rearranged, cols * rows * frows * sizeof(float), cudaMemcpyDeviceToHost);
             if (err != 0) std::cout << err << std::endl;
 
     cudaFree(d_in);
@@ -191,7 +193,7 @@ bool CUDA::execute_conv(float* in, float* out)
     return true;
 }
 //
-bool CUDA::execute_fft(float* in, float* out)
+bool execute_fft(const float* in, float* out, int cols, int rows, const Wavelet& wavelet)
 {
     auto err = cudaSetDevice(0);
     if (err != 0) std::cout << err << std::endl;
@@ -276,11 +278,10 @@ bool CUDA::execute_fft(float* in, float* out)
     cudaDeviceSynchronize();
     auto finish = std::chrono::high_resolution_clock::now();
     auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    std::cout << "CUDA FFT Elapsed time: " << duration_us.count() << " us\n";
     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    std::cout << "CUDA FFT Elapsed time: " << duration_ms.count() << " ms\n";
+    std::cout << "CUDA FFT Elapsed time: " << duration_us.count() << "us\t" << duration_ms.count() << "ms\n";
 
-    err = cudaMemcpy(out, d_out, cols * rows * scales.size() * sizeof(float), cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(out, d_out, cols * rows * frows * sizeof(float), cudaMemcpyDeviceToHost);
     if (err != 0) std::cout << err << std::endl;
 
     cufftDestroy(wavelet_plan);
@@ -293,4 +294,20 @@ bool CUDA::execute_fft(float* in, float* out)
     cudaFree(fft_out);
     cudaFree(fft_wavelet);
     return true;
+}
+
+
+bool CUDA::execute(const float* in, float* out, Mode mode)
+{
+    bool status = false;
+    if (mode == TimeDomain)
+    {
+        status = execute_conv(in, out, cols, rows, wavelet);
+    }
+    else if (mode == FrequencyDomain)
+    {
+        status = execute_fft(in, out, cols, rows, wavelet);
+    }
+
+    return status;
 }

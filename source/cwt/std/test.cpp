@@ -1,8 +1,10 @@
+/// \file test.cpp
+/// \author Denis Kozlov
 #include <cmath>
 
 #include <cwt/cuda/cwt.h>
-#include "cwt/std/cwt.h"
-#include "utils.hpp"
+#include <cwt/std/cwt.h>
+#include <utils.hpp>
 
 #include <CppUTest/TestHarness.h>
 
@@ -40,7 +42,7 @@ TEST(CWTSTD, Conv)
 
     STD cwt(cols, rows, wavelet, wavelet.scales());
 
-    cwt.execute_conv(input, output);
+    cwt.execute(input, output);
 
     float diff = Difference::Subtraction(output, expected, outputlen);
 
